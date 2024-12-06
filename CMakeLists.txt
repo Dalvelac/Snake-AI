@@ -4,21 +4,26 @@ project(SnakeAI)
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 20)
 
-# Add the executable
-add_executable(SnakeAI main.cpp)
+# Add include directories
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Add source files explicitly
+add_executable(SnakeAI
+        main.cpp          # Main entry point
+        src/Game.cpp      # Game logic
+        include/Game.h    # Header for game logic
+)
 
 # SDL Configuration
-set(SDL2_DIR D:/SDL-release-2.30.9) # Update this path to your SDL directory
-include_directories(${SDL2_DIR}/include)
-link_directories(${SDL2_DIR}/lib)
-target_link_libraries(SnakeAI SDL2 SDL2main)
+include_directories(D:/SDL-release-2.30.9/build/include/SDL2) # Full path to SDL headers
+target_link_libraries(SnakeAI
+        D:/SDL-release-2.30.9/libSDL2.a       # Full path to SDL2 library
+        D:/SDL-release-2.30.9/libSDL2main.a   # Full path to SDL2main library
+)
 
 # Eigen Configuration
-set(EIGEN_DIR D:/eigen-master) # Update this path to your Eigen directory
-include_directories(${EIGEN_DIR})
+include_directories(D:/eigen-master) # Full path to Eigen headers
 
 # Google Test Configuration
-set(GTEST_DIR D:/googletest-main) # Update this path to your Google Test directory
-add_subdirectory(${GTEST_DIR} googletest-build)
+add_subdirectory(D:/googletest-main googletest-build)
 target_link_libraries(SnakeAI gtest gtest_main)
-
