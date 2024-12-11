@@ -13,7 +13,7 @@ public:
 
     bool init(const std::string& title, int width, int height);
     void run();
-    void cleanup();
+    void cleanup() const;
 
 private:
     bool isRunning;
@@ -27,18 +27,19 @@ private:
     std::vector<std::pair<int, int>> snake; // Snake's position (row, col)
     std::pair<int, int> food;              // Food's position (row, col)
     int direction;                         // 0=Up, 1=Right, 2=Down, 3=Left
-
-    int score;                             // Tracks the number of apples eaten
-    Uint32 startTime;                      // Tracks the time the game started
+    int score;                             // Player's score
+    Uint32 startTime;                      // Start time of the game
 
     void handleEvents();
     void update();
     void render();
-    void renderHUD();                      // Renders the score and time alive
+    void renderHUD() const;                // Marked const for immutability
+    void logDeath() const;                 // Marked const for immutability
     void resetGame();
     void spawnFood();
-    bool checkCollision(int row, int col) const; // Added const qualifier to match the definition
-    void logDeath();                       // Logs score and time alive to a file
+    void renderCheckerboard() const;       // Marked const for immutability
+    void renderBorders() const;            // Marked const for immutability
+    [[nodiscard]] bool checkCollision(int row, int col) const; // Added const qualifier to match the definition
 };
 
 #endif // GAME_H

@@ -59,7 +59,7 @@ void Game::spawnFood() {
 }
 
 bool Game::checkCollision(int row, int col) const {
-    return std::any_of(snake.begin(), snake.end(), [row, col](const auto& segment) {
+    return std::ranges::any_of(snake, [row, col](const auto& segment) {
         return segment.first == row && segment.second == col;
     });
 }
@@ -124,7 +124,7 @@ void Game::render() {
 
     // Render the snake
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue
-    for (auto& segment : snake) {
+    for (const auto& segment : snake) {
         SDL_Rect cell = {segment.second * cellSize, segment.first * cellSize, cellSize, cellSize};
         SDL_RenderFillRect(renderer, &cell);
     }
@@ -141,24 +141,48 @@ void Game::render() {
     SDL_RenderPresent(renderer);
 }
 
-void Game::renderHUD() {
+void Game::renderCheckerboard() const {
+    SDL_SetRenderDrawColor(renderer, 173, 216, 230, 255); // Light green
+    SDL_RenderClear(renderer);
+
+    bool isDark = false;
+    for (int row = 0; row < gridRows; ++row) {
+        for (int col = 0; col < gridCols; ++col) {
+            SDL_SetRenderDrawColor(renderer, isDark ? 144 : 238, 238, isDark ? 144 : 245, 255); // Alternating greens
+            SDL_Rect cell = {col * cellSize, row * cellSize, cellSize, cellSize};
+            SDL_RenderFillRect(renderer, &cell);
+            isDark = !isDark;
+        }
+        isDark = !isDark;
+    }
+}
+
+void Game::renderBorders() const {
+    SDL_SetRenderDrawColor(renderer, 0, 128, 0, 255); // Dark green
+    SDL_Rect border = {0, 0, gridCols * cellSize, gridRows * cellSize};
+    SDL_RenderDrawRect(renderer, &border);
+}
+
+
+
+void Game::renderHUD() const {
     Uint32 currentTime = SDL_GetTicks();
-    float timeAlive = (currentTime - startTime) / 1000.0f;
+    float timeAlive = static_cast<float>(currentTime - startTime) / 1000.0f;
 
     std::cout << "Score: " << score << " | Time Alive: " << std::fixed << std::setprecision(2) << timeAlive << "s" << std::endl;
 }
 
-void Game::logDeath() {
+void Game::logDeath() const {
     if (startTime == 0) return; // Skip if game hasn't started
     Uint32 endTime = SDL_GetTicks();
-    float timeAlive = (endTime - startTime) / 1000.0f;
+    float timeAlive = static_cast<float>(endTime - startTime) / 1000.0f;
 
     std::ofstream logFile("game_log.txt", std::ios::app);
     logFile << "Score: " << score << ", Time Alive: " << std::fixed << std::setprecision(2) << timeAlive << "s\n";
     logFile.close();
 }
 
-void Game::cleanup() {
+void Game::cleanup() const {
     if (renderer) SDL_DestroyRenderer(renderer);
     if (window) SDL_DestroyWindow(window);
     SDL_Quit();
