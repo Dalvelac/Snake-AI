@@ -1,10 +1,12 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "Logger.h" // Include Logger
 #include <SDL.h>
 #include <vector>
 #include <utility>
-#include <iostream>
+#include <string> // For std::string
+#include <..\include\SDL2\SDL_ttf.h>
 
 class Game {
 public:
@@ -19,6 +21,7 @@ private:
     bool isRunning;
     SDL_Window* window;
     SDL_Renderer* renderer;
+    TTF_Font* font; // Font for rendering HUD
 
     const int gridRows = 20;
     const int gridCols = 20;
@@ -30,16 +33,17 @@ private:
     int score;                             // Player's score
     Uint32 startTime;                      // Start time of the game
 
+    Logger logger;                         // Logger instance for managing logs
+
     void handleEvents();
     void update();
     void render();
-    void renderHUD() const;                // Marked const for immutability
-    void logDeath() const;                 // Marked const for immutability
+    void renderHUD() const;
     void resetGame();
     void spawnFood();
-    void renderCheckerboard() const;       // Marked const for immutability
-    void renderBorders() const;            // Marked const for immutability
-    [[nodiscard]] bool checkCollision(int row, int col) const; // Added const qualifier to match the definition
+    void renderCheckerboard() const;
+    void renderBorders() const;
+    [[nodiscard]] bool checkCollision(int row, int col) const;
 };
 
 #endif // GAME_H
