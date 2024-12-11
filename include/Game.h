@@ -33,7 +33,7 @@ private:
     void render();
     void resetGame();
     void spawnFood();
-    bool checkCollision(int row, int col);
+    bool checkCollision(int row, int col) const; // Added const qualifier to match the definition
 };
 
 #endif // GAME_H

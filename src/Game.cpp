@@ -1,13 +1,11 @@
 #include "Game.h"
-#include <cstdlib>
-#include <ctime>
+#include <random>
 #include <iostream>
+#include <algorithm> // Added for std::any_of
 
-Game::Game() : isRunning(false), window(nullptr), renderer(nullptr), direction(1) {
-    srand(static_cast<unsigned>(time(0)));
-}
+Game::Game() : isRunning(false), window(nullptr), renderer(nullptr), direction(1) {}
 
-Game::~Game() {}
+Game::~Game() = default; // Use default destructor
 
 bool Game::init(const std::string& title, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -38,26 +36,28 @@ void Game::resetGame() {
 }
 
 void Game::spawnFood() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distRow(0, gridRows - 1);
+    std::uniform_int_distribution<> distCol(0, gridCols - 1);
+
     int row, col;
     do {
-        row = rand() % gridRows;
-        col = rand() % gridCols;
+        row = distRow(gen);
+        col = distCol(gen);
     } while (checkCollision(row, col));
     food = {row, col};
 }
 
-bool Game::checkCollision(int row, int col) {
-    for (auto& segment : snake) {
-        if (segment.first == row && segment.second == col) {
-            return true;
-        }
-    }
-    return false;
+bool Game::checkCollision(int row, int col) const {
+    return std::any_of(snake.begin(), snake.end(), [row, col](const auto& segment) {
+        return segment.first == row && segment.second == col;
+    });
 }
 
 void Game::handleEvents() {
-    SDL_Event event; // Declare event here
-    while (SDL_PollEvent(&event)) { // Pass event by reference
+    SDL_Event event{}; // Corrected initialization
+    while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             isRunning = false;
         }
@@ -75,11 +75,12 @@ void Game::handleEvents() {
                 case SDLK_LEFT:
                     if (direction != 1) direction = 3;
                 break;
+                default:
+                    break; // Handle default case
             }
         }
     }
 }
-
 
 void Game::update() {
     // Move the snake
@@ -89,6 +90,7 @@ void Game::update() {
         case 1: head.second++; break; // Right
         case 2: head.first++; break; // Down
         case 3: head.second--; break; // Left
+        default: break; // Handle default case
     }
     // Collision check
     if (head.first < 0 || head.second < 0 || head.first >= gridRows || head.second >= gridCols || checkCollision(head.first, head.second)) {
@@ -134,8 +136,8 @@ void Game::render() {
 }
 
 void Game::cleanup() {
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    if (renderer) SDL_DestroyRenderer(renderer);
+    if (window) SDL_DestroyWindow(window);
     SDL_Quit();
 }
 

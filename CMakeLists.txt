@@ -15,15 +15,21 @@ add_executable(SnakeAI
 )
 
 # SDL Configuration
-include_directories(D:/SDL-release-2.30.9/build/include/SDL2) # Full path to SDL headers
+include_directories(
+        D:/SDL-release-2.30.9/build/include/SDL2
+        D:/SDL-release-2.30.9/include
+        D:/SDL-release-2.30.9/build# SDL include path
+)
+
+# Link SDL2 libraries
 target_link_libraries(SnakeAI
-        D:/SDL-release-2.30.9/libSDL2.a       # Full path to SDL2 library
-        D:/SDL-release-2.30.9/libSDL2main.a   # Full path to SDL2main library
+        D:/SDL-release-2.30.9/build/libSDL2main.a  # Entry point for SDL
+        D:/SDL-release-2.30.9/build/libSDL2.dll.a  # Import library for SDL2.dll
+        -lmingw32                                  # MinGW compatibility library
+        -luser32 -lgdi32 -lwinmm -ldxguid          # Windows-specific libraries
 )
 
 # Eigen Configuration
-include_directories(D:/eigen-master) # Full path to Eigen headers
+include_directories(D:/eigen-master)              # Full path to Eigen headers
 
-# Google Test Configuration
-add_subdirectory(D:/googletest-main googletest-build)
-target_link_libraries(SnakeAI gtest gtest_main)
+# Google Test Configurat
