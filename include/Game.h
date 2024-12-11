@@ -43,6 +43,9 @@ private:
     void spawnFood();
     void renderCheckerboard() const;
     void renderBorders() const;
+    void renderCircle(int x, int y, int radius, SDL_Color color) const;
+    void renderSnake() const;
+    void renderApple() const;
     [[nodiscard]] bool checkCollision(int row, int col) const;
 };
 
