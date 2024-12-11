@@ -1,19 +1,25 @@
 #include "Game.h"
 #include <random>
 #include <iostream>
+#include <fstream>
 #include <algorithm> // Added for std::any_of
+#include <iomanip>   // For formatting time display
 
-Game::Game() : isRunning(false), window(nullptr), renderer(nullptr), direction(1) {}
+Game::Game() : isRunning(false), window(nullptr), renderer(nullptr), direction(1), score(0), startTime(0) {}
 
 Game::~Game() = default; // Use default destructor
 
 bool Game::init(const std::string& title, int width, int height) {
+    // Calculate window dimensions based on the grid size and cell size
+    int windowWidth = gridCols * cellSize;
+    int windowHeight = gridRows * cellSize;
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cerr << "SDL Initialization Error: " << SDL_GetError() << std::endl;
         return false;
     }
 
-    window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
     if (!window) {
         std::cerr << "Window Creation Error: " << SDL_GetError() << std::endl;
         return false;
@@ -31,8 +37,11 @@ bool Game::init(const std::string& title, int width, int height) {
 }
 
 void Game::resetGame() {
+    logDeath(); // Log score and time alive
     snake = {{10, 10}, {10, 9}, {10, 8}}; // Initial snake position
     spawnFood();
+    score = 0;
+    startTime = SDL_GetTicks(); // Reset timer
 }
 
 void Game::spawnFood() {
@@ -92,9 +101,9 @@ void Game::update() {
         case 3: head.second--; break; // Left
         default: break; // Handle default case
     }
-    // Collision check
+    // Check collision with borders
     if (head.first < 0 || head.second < 0 || head.first >= gridRows || head.second >= gridCols || checkCollision(head.first, head.second)) {
-        resetGame();
+        resetGame(); // Reset the game on collision
         return;
     }
     snake.insert(snake.begin(), head);
@@ -102,23 +111,16 @@ void Game::update() {
     // Food check
     if (head == food) {
         spawnFood();
+        score++; // Increment score when eating food
     } else {
         snake.pop_back(); // Remove tail
     }
 }
 
 void Game::render() {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    // Set the background color to dark green
+    SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
     SDL_RenderClear(renderer);
-
-    // Render the grid
-    SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255); // Dark green
-    for (int row = 0; row < gridRows; ++row) {
-        for (int col = 0; col < gridCols; ++col) {
-            SDL_Rect cell = {col * cellSize, row * cellSize, cellSize, cellSize};
-            SDL_RenderFillRect(renderer, &cell);
-        }
-    }
 
     // Render the snake
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue
@@ -132,7 +134,28 @@ void Game::render() {
     SDL_Rect foodRect = {food.second * cellSize, food.first * cellSize, cellSize, cellSize};
     SDL_RenderFillRect(renderer, &foodRect);
 
+    // Render score and time
+    renderHUD();
+
+    // Present the rendered objects
     SDL_RenderPresent(renderer);
+}
+
+void Game::renderHUD() {
+    Uint32 currentTime = SDL_GetTicks();
+    float timeAlive = (currentTime - startTime) / 1000.0f;
+
+    std::cout << "Score: " << score << " | Time Alive: " << std::fixed << std::setprecision(2) << timeAlive << "s" << std::endl;
+}
+
+void Game::logDeath() {
+    if (startTime == 0) return; // Skip if game hasn't started
+    Uint32 endTime = SDL_GetTicks();
+    float timeAlive = (endTime - startTime) / 1000.0f;
+
+    std::ofstream logFile("game_log.txt", std::ios::app);
+    logFile << "Score: " << score << ", Time Alive: " << std::fixed << std::setprecision(2) << timeAlive << "s\n";
+    logFile.close();
 }
 
 void Game::cleanup() {
@@ -148,4 +171,5 @@ void Game::run() {
         render();
         SDL_Delay(100); // Control game speed
     }
+    logDeath(); // Log the final results before exiting
 }

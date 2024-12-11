@@ -14,11 +14,13 @@ add_executable(SnakeAI
         include/Game.h    # Header for game logic
 )
 
+# Define SDL_MAIN_HANDLED to prevent SDL from overriding main()
+add_definitions(-DSDL_MAIN_HANDLED)
+
 # SDL Configuration
 include_directories(
-        D:/SDL-release-2.30.9/build/include/SDL2
-        D:/SDL-release-2.30.9/include
-        D:/SDL-release-2.30.9/build# SDL include path
+        D:/SDL-release-2.30.9/build/include/SDL2 # SDL include path
+        D:/SDL-release-2.30.9/include            # Backup include path
 )
 
 # Link SDL2 libraries
@@ -29,7 +31,17 @@ target_link_libraries(SnakeAI
         -luser32 -lgdi32 -lwinmm -ldxguid          # Windows-specific libraries
 )
 
+# Add a post-build step to copy the SDL2.dll to the output directory
+add_custom_command(
+        TARGET SnakeAI POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "D:/SDL-release-2.30.9/build/SDL2.dll"
+        $<TARGET_FILE_DIR:SnakeAI>
+)
+
 # Eigen Configuration
 include_directories(D:/eigen-master)              # Full path to Eigen headers
 
-# Google Test Configurat
+# Google Test Configuration
+add_subdirectory(D:/googletest-main googletest-build)
+target_link_libraries(SnakeAI gtest gtest_main)
