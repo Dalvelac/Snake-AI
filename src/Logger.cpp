@@ -114,14 +114,14 @@ void Logger::printGameEnd(int score, Uint32 startTime) {
     }
 }
 
-std::string Logger::getTimestamp(const std::chrono::system_clock::time_point &timePoint) const {
+std::string Logger::getTimestamp(const std::chrono::system_clock::time_point &timePoint) {
     std::time_t time = std::chrono::system_clock::to_time_t(timePoint);
     char buffer[100];
     std::strftime(buffer, sizeof(buffer), "%Y-%m-%d_%H-%M-%S", std::localtime(&time));
     return std::string(buffer);
 }
 
-std::string Logger::logLevelToString(LogLevel level) const {
+std::string Logger::logLevelToString(LogLevel level) {
     switch (level) {
         case INFO:
             return "INFO";

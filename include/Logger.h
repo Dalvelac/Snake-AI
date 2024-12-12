@@ -32,8 +32,8 @@ public:
 
     // Utility functions
     void writeLog(LogLevel level, const std::string &message) const;
-    std::string getTimestamp(const std::chrono::system_clock::time_point &timePoint) const;
-    std::string logLevelToString(LogLevel level) const;
+    static std::string getTimestamp(const std::chrono::system_clock::time_point &timePoint) ;
+    static std::string logLevelToString(LogLevel level) ;
 
 private:
     int testRun;                             // Test run identifier
